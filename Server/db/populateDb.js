@@ -164,7 +164,7 @@ const main = async() => {
                 patient_id INT NOT NULL REFERENCES patients(id),
                 topic VARCHAR(50),
                 due_date DATE NOT NULL,
-                status VARCHAR(10) DEFAULT 'Upcoming' CHECK (status IN ('Upcoming', 'Sent', 'Overdue', 'Completed', 'Cancelled')),
+                status VARCHAR(10) DEFAULT 'Upcoming' CHECK (status IN ('Upcoming', 'Sent', 'Overdue', 'Appointed', 'Cancelled')),
                 notes TEXT,
                 created_at TIMESTAMP DEFAULT NOW()
             ); 

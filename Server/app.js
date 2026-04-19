@@ -1,7 +1,8 @@
 import express from 'express';
 import 'dotenv/config';
-
+import cors from 'cors';
 import { authenticate } from './middleware/auth.middleware.js';
+import { registerJobs  } from './jobs/scheduler.js';
 
 import authRouter             from './routes/auth.routes.js';
 import patientsRouter         from './routes/patients.routes.js';
@@ -15,7 +16,7 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
+app.use(cors({ origin: process.env.FRONTEND_URL }))
 // Public routes (no token needed)
 app.use('/api/auth', authRouter);
 
@@ -40,4 +41,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    registerJobs();
 });
