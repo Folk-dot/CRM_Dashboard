@@ -5,7 +5,7 @@ import { Badge, Modal, ConfirmDialog, PageSpinner, Alert, EmptyState } from '../
 import PageHeader from '../components/layout/PageHeader.jsx';
 
 const EMPTY_FORM = { patient_id:'', topic:'', due_date:'', status:'Upcoming', notes:'' };
-const STATUSES   = ['Upcoming','Sent','Overdue','Completed','Cancelled'];
+const STATUSES   = ['Upcoming','Sent','Overdue','Appointed','Cancelled'];
 const TOPICS     = [
   '6-month check-up','Annual X-ray','Post root canal follow-up',
   'Braces adjustment','Treatment review','Post extraction check',
@@ -34,12 +34,6 @@ function ReminderForm({ form, onChange, error, loading, onSubmit, onClose, patie
         <div>
           <label className="label">Due date *</label>
           <input name="due_date" type="date" required value={form.due_date} onChange={onChange} className="input" />
-        </div>
-        <div className="col-span-2">
-          <label className="label">Status</label>
-          <select name="status" value={form.status} onChange={onChange} className="input">
-            {STATUSES.map(s => <option key={s}>{s}</option>)}
-          </select>
         </div>
         <div className="col-span-2">
           <label className="label">Notes</label>
@@ -77,11 +71,6 @@ export default function RemindersPage() {
   const openDel    = (r) => { setSelected(r); setModal('delete'); };
   const closeModal = () => { setModal(null); setSelected(null); };
 
-  const markSent = async (r) => {
-    try { await remindersService.update(r.id, { status: 'Sent' }); await refetch(); }
-    catch { /* ignore */ }
-  };
-
   const handleSave = async (e) => {
     e.preventDefault(); setSaving(true); setFormErr('');
     try {
@@ -98,7 +87,8 @@ export default function RemindersPage() {
     catch { /* ignore */ } finally { setDeleting(false); }
   };
 
-  const isOverdue = (r) => r.status === 'Overdue' || (r.status === 'Upcoming' && r.due_date < new Date().toISOString().slice(0,10));
+  // Status is computed by the backend based on due_date — just use r.status directly
+  const isOverdue = (r) => r.status === 'Overdue';
 
   return (
     <div>
@@ -132,12 +122,9 @@ export default function RemindersPage() {
                         <td className="table-td font-medium text-gray-900">{r.patient_name}</td>
                         <td className="table-td text-gray-500">{r.topic ?? '—'}</td>
                         <td className={`table-td text-sm ${isOverdue(r) ? 'text-red-500 font-medium' : 'text-gray-500'}`}>{new Date(r.due_date).toLocaleString('en-GB',{dateStyle:'short'})}</td>
-                        <td className="table-td"><Badge value={isOverdue(r) && r.status==='Upcoming' ? 'Overdue' : r.status} /></td>
+                        <td className="table-td"><Badge value={r.status} /></td>
                         <td className="table-td">
                           <div className="flex gap-2 justify-end">
-                            {r.status === 'Upcoming' && (
-                              <button onClick={() => markSent(r)} className="btn-secondary text-xs py-1 px-2">Mark sent</button>
-                            )}
                             <button onClick={() => openEdit(r)} className="btn-secondary text-xs py-1 px-2">Edit</button>
                             <button onClick={() => openDel(r)}  className="btn-danger    text-xs py-1 px-2">Delete</button>
                           </div>
